@@ -1,6 +1,19 @@
-<main class="min-h-screen bg-[#FDF9F0] pb-24 font-sans text-gray-900 mx-auto max-w-md relative sm:max-w-full sm:shadow-none shadow-2xl overflow-x-hidden md:bg-gray-100">
-  <div class="md:max-w-md md:mx-auto md:bg-[#FDF9F0] md:min-h-screen md:shadow-2xl md:relative md:overflow-x-hidden">
-    <router-outlet></router-outlet>
-    <app-bottom-nav></app-bottom-nav>
-  </div>
+<main class="min-h-screen bg-[#FDF9F0] font-sans text-gray-900 w-full relative overflow-x-hidden flex flex-col pb-[90px] md:pb-0">
+  
+  <!-- Desktop Navigation (Hidden on mobile) -->
+  <nav class="hidden md:flex items-center justify-between px-8 lg:px-12 py-6 absolute top-0 w-full z-50 text-white max-w-[1440px] left-1/2 -translate-x-1/2">
+    <div class="font-serif text-2xl font-bold tracking-tight">Angeles Eats &amp; Roots</div>
+    <div class="flex items-center gap-8 font-medium text-[15px]">
+      <a routerLink="/" routerLinkActive="text-angeles-yellow font-bold !opacity-100" [routerLinkActiveOptions]="{exact: true}" class="drop-shadow-sm opacity-90 hover:opacity-100 transition-opacity">Home</a>
+      <a routerLink="/explore" routerLinkActive="text-angeles-yellow font-bold !opacity-100" class="drop-shadow-sm opacity-90 hover:opacity-100 transition-opacity">Explore Map</a>
+      <a routerLink="/submit" routerLinkActive="text-angeles-yellow font-bold !opacity-100" class="drop-shadow-sm opacity-90 hover:opacity-100 transition-opacity">Submit</a>
+      <a routerLink="/profile" routerLinkActive="bg-white/20" class="bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md px-6 py-2.5 rounded-full transition-colors flex items-center gap-2 shadow-sm font-semibold">
+        Profile
+      </a>
+    </div>
+  </nav>
+
+  <router-outlet></router-outlet>
+
+  <app-bottom-nav class="block md:hidden"></app-bottom-nav>
 </main>

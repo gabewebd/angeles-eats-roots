@@ -1,35 +1,35 @@
 <nav class="fixed bottom-0 w-full bg-white border-t border-gray-100 px-6 pt-3 pb-safe-bottom min-h-[75px] rounded-t-3xl shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] md:max-w-md z-50">
   <div class="flex justify-between items-center h-full max-w-sm mx-auto">
-    <!-- Home (Active) -->
-    <button class="flex flex-col items-center gap-1 text-angeles-blue min-w-[64px]">
-      <div class="bg-blue-50 p-2 rounded-2xl">
-        <lucide-icon name="home" [size]="24" class="text-angeles-blue fill-blue-50" [strokeWidth]="2"></lucide-icon>
+    <!-- Home -->
+    <a routerLink="/" routerLinkActive="text-angeles-blue font-semibold scale-110" [routerLinkActiveOptions]="{exact: true}" class="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600 transition-all min-w-[64px] pb-2 pt-2 group">
+      <div class="p-1 rounded-2xl group-[.text-angeles-blue]:bg-blue-50 transition-colors">
+        <lucide-icon name="home" [size]="24" class="group-[.text-angeles-blue]:text-angeles-blue group-[.text-angeles-blue]:fill-blue-50" [strokeWidth]="2"></lucide-icon>
       </div>
-      <span class="text-[10px] font-semibold">Home</span>
-    </button>
+      <span class="text-[10px] font-medium group-[.font-semibold]:font-semibold">Home</span>
+    </a>
 
     <!-- Explore Map -->
-    <button class="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600 transition-colors min-w-[64px] pb-2 pt-2">
-      <div class="p-1">
-        <lucide-icon name="map" [size]="24" [strokeWidth]="2"></lucide-icon>
+    <a routerLink="/explore" routerLinkActive="text-angeles-blue font-semibold scale-110" class="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600 transition-all min-w-[64px] pb-2 pt-2 group">
+      <div class="p-1 rounded-2xl group-[.text-angeles-blue]:bg-blue-50 transition-colors">
+        <lucide-icon name="map" [size]="24" class="group-[.text-angeles-blue]:text-angeles-blue group-[.text-angeles-blue]:fill-blue-50" [strokeWidth]="2"></lucide-icon>
       </div>
-      <span class="text-[10px] font-medium">Explore Map</span>
-    </button>
+      <span class="text-[10px] font-medium group-[.font-semibold]:font-semibold">Explore Map</span>
+    </a>
 
     <!-- Submit -->
-    <button class="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600 transition-colors min-w-[64px] pb-2 pt-2">
-      <div class="p-1">
-        <lucide-icon name="plus-circle" [size]="24" [strokeWidth]="2"></lucide-icon>
+    <a routerLink="/submit" routerLinkActive="text-angeles-blue font-semibold scale-110" class="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600 transition-all min-w-[64px] pb-2 pt-2 group">
+      <div class="p-1 rounded-2xl group-[.text-angeles-blue]:bg-blue-50 transition-colors">
+        <lucide-icon name="plus-circle" [size]="24" class="group-[.text-angeles-blue]:text-angeles-blue group-[.text-angeles-blue]:fill-blue-50" [strokeWidth]="2"></lucide-icon>
       </div>
-      <span class="text-[10px] font-medium">Submit</span>
-    </button>
+      <span class="text-[10px] font-medium group-[.font-semibold]:font-semibold">Submit</span>
+    </a>
 
     <!-- Profile -->
-    <button class="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600 transition-colors min-w-[64px] pb-2 pt-2">
-      <div class="p-1">
-        <lucide-icon name="user" [size]="24" [strokeWidth]="2"></lucide-icon>
+    <a routerLink="/profile" routerLinkActive="text-angeles-blue font-semibold scale-110" class="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600 transition-all min-w-[64px] pb-2 pt-2 group">
+      <div class="p-1 rounded-2xl group-[.text-angeles-blue]:bg-blue-50 transition-colors">
+        <lucide-icon name="user" [size]="24" class="group-[.text-angeles-blue]:text-angeles-blue group-[.text-angeles-blue]:fill-blue-50" [strokeWidth]="2"></lucide-icon>
       </div>
-      <span class="text-[10px] font-medium">Profile</span>
-    </button>
+      <span class="text-[10px] font-medium group-[.font-semibold]:font-semibold">Profile</span>
+    </a>
   </div>
 </nav>
