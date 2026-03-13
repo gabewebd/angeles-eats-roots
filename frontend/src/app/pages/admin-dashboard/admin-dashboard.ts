@@ -1,16 +1,10 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AdminService } from '../../services/admin.service';
 import { AuthService } from '../../services/auth';
-import { LucideAngularModule } from 'lucide-angular';
-
-// Import Admin Components
-import { MetricCard } from '../../components/admin/metric-card/metric-card';
-import { EngagementChart } from '../../components/admin/engagement-chart/engagement-chart';
-import { TrendingList } from '../../components/admin/trending-list/trending-list';
+import { LucideAngularModule, Loader, Check, LogOut, Activity, X, BadgeCheck, Eye } from 'lucide-angular';
 import { ApprovalItem } from '../../components/admin/approval-item/approval-item';
-import { ImpactInsight } from '../../components/admin/impact-insight/impact-insight';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -18,11 +12,7 @@ import { ImpactInsight } from '../../components/admin/impact-insight/impact-insi
   imports: [
     CommonModule,
     LucideAngularModule,
-    MetricCard,
-    EngagementChart,
-    TrendingList,
-    ApprovalItem,
-    ImpactInsight
+    ApprovalItem
   ],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css',
@@ -32,61 +22,93 @@ export class AdminDashboard implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  metrics: any = null;
+  readonly loader = Loader;
+  readonly check = Check;
+  readonly logOut = LogOut;
+  readonly activity = Activity;
+
   pendingVendors: any[] = [];
-  loading = true;
-  error = '';
+  loading = signal(true);
+  error = signal('');
+  selectedVendor = signal<any>(null);
   today = new Date();
 
   ngOnInit() {
-    if (!this.authService.isLoggedIn()) {
-      this.router.navigate(['/admin-login']);
-      return;
-    }
+    console.log('Audit: Admin Dashboard Init');
     this.refreshData();
   }
 
   refreshData() {
-    this.loading = true;
-    this.adminService.getDashboardMetrics().subscribe({
-      next: (data) => {
-        this.metrics = data;
-        this.loadPendingVendors();
-      },
-      error: (err) => {
-        this.error = 'Failed to load dashboard metrics.';
-        this.loading = false;
-      }
-    });
-  }
-
-  loadPendingVendors() {
+    this.loading.set(true);
+    this.error.set('');
     this.adminService.getPendingVendors().subscribe({
       next: (data) => {
+        console.log('Audit: Pending vendors fetched', data);
         this.pendingVendors = data;
-        this.loading = false;
+        this.loading.set(false);
       },
-      error: () => {
-        this.error = 'Failed to load pending vendors.';
-        this.loading = false;
+      error: (err) => {
+        console.error('Audit: Dashboard fetch error', err);
+        this.error.set('Failed to load pending submissions.');
+        this.loading.set(false);
       }
     });
   }
 
   onApprove(id: string) {
+    console.log(`Audit: Approving vendor ${id}`);
     this.adminService.approveVendor(id).subscribe({
-      next: () => this.refreshData(),
-      error: () => alert('Approval failed.')
+      next: (res) => {
+        console.log('Audit: Approval Success', res);
+        this.selectedVendor.set(null);
+        this.refreshData();
+      },
+      error: (err) => {
+        console.error('Audit: Approval Error', err);
+        alert('Verification update failed. See console.');
+      }
     });
   }
 
   onReject(id: string) {
-    if (confirm('Are you sure you want to reject and delete this listing?')) {
+    if (confirm('Audit: Confirm rejection and permanent deletion?')) {
+      console.log(`Audit: Rejecting vendor ${id}`);
       this.adminService.rejectVendor(id).subscribe({
-        next: () => this.refreshData(),
-        error: () => alert('Rejection failed.')
+        next: (res) => {
+          console.log('Audit: Rejection Success', res);
+          this.selectedVendor.set(null);
+          this.refreshData();
+        },
+        error: (err) => {
+          console.error('Audit: Rejection Error', err);
+          alert('Deletion failed. See console.');
+        }
       });
     }
+  }
+
+  onAuthenticate(id: string) {
+    console.log(`Audit: Authenticating vendor ${id}`);
+    this.adminService.authenticateVendor(id).subscribe({
+      next: (res) => {
+        console.log('Audit: Authentication Success', res);
+        alert('Vendor marked as Verified Authentic!');
+      },
+      error: (err) => {
+        console.error('Audit: Authentication Error', err);
+        alert('Authentication failed. See console.');
+      }
+    });
+  }
+
+  viewDetails(vendor: any) {
+    this.selectedVendor.set(
+      this.selectedVendor()?._id === vendor._id ? null : vendor
+    );
+  }
+
+  closeDetails() {
+    this.selectedVendor.set(null);
   }
 
   logout() {

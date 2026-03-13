@@ -1,61 +1,82 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LucideAngularModule, Search, BadgeCheck, MapPin, Star, Utensils, Landmark, ArrowRight } from 'lucide-angular';
+import { LucideAngularModule, Search, BadgeCheck, MapPin, Star, Utensils, Landmark, ArrowRight, Loader } from 'lucide-angular';
+import { VendorService, Vendor } from '../../services/vendor';
+import { Router, RouterModule, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-home',
-  imports: [CommonModule, LucideAngularModule],
+  standalone: true,
+  imports: [CommonModule, LucideAngularModule, RouterModule, RouterLink],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
-export class Home {
-  readonly Search = Search;
-  readonly BadgeCheck = BadgeCheck;
-  readonly MapPin = MapPin;
-  readonly Star = Star;
-  readonly Utensils = Utensils;
-  readonly Landmark = Landmark;
-  readonly ArrowRight = ArrowRight;
+export class Home implements OnInit {
+  readonly search = Search;
+  readonly badgeCheck = BadgeCheck;
+  readonly mapPin = MapPin;
+  readonly star = Star;
+  readonly utensils = Utensils;
+  readonly landmark = Landmark;
+  readonly arrowRight = ArrowRight;
+  readonly loader = Loader;
 
-  trendingSpots = [
-    {
-      name: "Aling Lucing's Sisig",
-      description: "The birthplace of the original Kapampangan sisig",
-      image: "https://images.unsplash.com/photo-1628294895950-9805252327bc?auto=format&fit=crop&q=80&w=800",
-      rating: 4.9,
-      location: "Angeles City",
-      verified: true
-    },
-    {
-      name: "Everybody's Cafe",
-      description: "Iconic Kapampangan comfort food since 1950",
-      image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=800",
-      rating: 4.8,
-      location: "Angeles City",
-      verified: true
-    }
-  ];
+  private vendorService = inject(VendorService);
+  private router = inject(Router);
 
-  culturalHighlights = [
-    {
-      name: "Holy Rosary Parish Church",
-      description: "Spanish-era church, est. 1877",
-      image: "https://images.unsplash.com/photo-1548625361-9f9fdbdcbdfb?auto=format&fit=crop&q=80&w=800",
-      category: "Heritage",
-      location: "Angeles City"
-    },
-    {
-      name: "Pamintuan Mansion",
-      description: "First anniversary of Philippine independence",
-      image: "https://images.unsplash.com/photo-1620216654763-71887e1f44cc?auto=format&fit=crop&q=80&w=800",
-      category: "Heritage",
-      location: "Angeles City"
-    }
-  ];
+  trendingSpots: Vendor[] = [];
+  culturalHighlights: Vendor[] = [];
+  activeCategory = 'trending';
+  loading = signal(true);
 
-  activeCategory = 'local-eateries';
+  ngOnInit() {
+    console.log('Audit: Home component initialized');
+    this.loadTrending();
+    this.loadHighlights();
+  }
+
+  loadTrending() {
+    this.loading.set(true);
+    console.log('Audit: Fetching trending spots...');
+    this.vendorService.getTrending().subscribe({
+      next: (data) => {
+        console.log('Audit: Trending spots received', data);
+        this.trendingSpots = data;
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Audit: Trending fetch failure', err);
+        this.loading.set(false);
+      }
+    });
+  }
+
+  loadHighlights() {
+    this.vendorService.getHeritageSites().subscribe({
+      next: (data) => this.culturalHighlights = data,
+      error: (err) => console.error('Audit: Highlights fetch failure', err)
+    });
+  }
 
   setCategory(category: string) {
     this.activeCategory = category;
+    this.loading.set(true);
+
+    const obs$ = category === 'local-eateries'
+      ? this.vendorService.getEateries()
+      : category === 'heritage-sites'
+        ? this.vendorService.getHeritageSites()
+        : this.vendorService.getTrending();
+
+    obs$.subscribe({
+      next: (data) => {
+        this.trendingSpots = data;
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false)
+    });
   }
+
+  goToDetail(id: string) { this.router.navigate(['/vendor-detail', id]); }
+  goToSubmit() { this.router.navigate(['/submit']); }
 }

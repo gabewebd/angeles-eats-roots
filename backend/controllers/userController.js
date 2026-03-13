@@ -1,10 +1,16 @@
 const User = require('../models/User');
 const Vendor = require('../models/Vendor');
+const mongoose = require('mongoose');
 
 // GET: User Profile with populated lists
 exports.getUserProfile = async (req, res) => {
     try {
-        const user = await User.findById(req.params.id)
+        const { id } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ success: false, message: 'Invalid User ID format' });
+        }
+
+        const user = await User.findById(id)
             .populate('savedPlaces', 'name category location images rating')
             .populate('favorites', 'name category location images rating')
             .populate('visited', 'name category')
@@ -12,9 +18,10 @@ exports.getUserProfile = async (req, res) => {
 
         if (!user) return res.status(404).json({ message: 'User not found' });
 
-        res.status(200).json(user);
+        return res.status(200).json(user);
     } catch (err) {
-        res.status(500).json({ error: 'Server Error' });
+        console.error('Audit: getUserProfile failed:', err);
+        return res.status(500).json({ error: 'Server Error' });
     }
 };
 
@@ -22,6 +29,11 @@ exports.getUserProfile = async (req, res) => {
 exports.toggleSavedPlace = async (req, res) => {
     try {
         const { userId, vendorId } = req.body;
+        
+        if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(vendorId)) {
+            return res.status(400).json({ success: false, message: 'Invalid ID format provided' });
+        }
+
         const user = await User.findById(userId);
 
         if (!user) return res.status(404).json({ message: 'User not found' });
@@ -34,8 +46,9 @@ exports.toggleSavedPlace = async (req, res) => {
         }
 
         await user.save();
-        res.status(200).json({ message: 'Saved places updated', savedPlaces: user.savedPlaces });
+        return res.status(200).json({ message: 'Saved places updated', savedPlaces: user.savedPlaces });
     } catch (err) {
-        res.status(500).json({ error: 'Server Error' });
+        console.error('Audit: toggleSavedPlace failed:', err);
+        return res.status(500).json({ error: 'Server Error' });
     }
 };

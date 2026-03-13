@@ -12,23 +12,11 @@
         </div>
 
         <div class="flex items-center gap-6">
-            <div class="relative hidden lg:block">
-                <lucide-icon name="search"
-                    class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4"></lucide-icon>
-                <input type="text" placeholder="Search vendors, listings..."
-                    class="pl-10 pr-4 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 w-64 transition-all">
-            </div>
-
-            <button class="relative text-gray-400 hover:text-blue-600 transition-colors">
-                <lucide-icon name="bell" class="w-5 h-5"></lucide-icon>
-                <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-            </button>
-
             <button (click)="logout()"
                 class="flex items-center gap-2 text-gray-500 hover:text-red-600 text-sm font-bold transition-all group">
-                <lucide-icon name="log-out"
+                <lucide-icon [name]="logOut"
                     class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform"></lucide-icon>
-                Back to App
+                Logout
             </button>
         </div>
     </header>
@@ -37,127 +25,138 @@
         <!-- Header Section -->
         <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-                <h2 class="text-3xl font-bold text-gray-900 tracking-tight mb-1">Dashboard Overview</h2>
-                <p class="text-gray-500 font-medium">Platform metrics and vendor management — as of {{ today |
+                <h2 class="text-3xl font-bold text-gray-900 tracking-tight mb-1">Audit Review</h2>
+                <p class="text-gray-500 font-medium">Verify submissions for the live community feed — as of {{ today |
                     date:'longDate' }}</p>
             </div>
-            <div *ngIf="loading" class="flex items-center gap-2 text-blue-600 text-sm font-bold">
-                <lucide-icon name="loader" class="w-4 h-4 animate-spin"></lucide-icon>
-                Syncing real-time data...
+            <div *ngIf="loading()" class="flex items-center gap-2 text-blue-600 text-sm font-bold">
+                <lucide-icon [name]="loader" class="w-4 h-4 animate-spin"></lucide-icon>
+                Scanning database...
             </div>
         </div>
 
         <!-- Error State -->
-        <div *ngIf="error"
+        <div *ngIf="error()"
             class="bg-red-50 border border-red-100 p-6 rounded-2xl mb-10 flex items-center justify-between">
             <div class="flex items-center gap-4 text-red-700">
                 <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-                    <lucide-icon name="activity" class="w-5 h-5"></lucide-icon>
+                    <lucide-icon [name]="activity" class="w-5 h-5"></lucide-icon>
                 </div>
                 <div>
-                    <p class="font-bold">Sync Error</p>
-                    <p class="text-sm opacity-80">{{ error }}</p>
+                    <p class="font-bold">Fetch Error</p>
+                    <p class="text-sm opacity-80">{{ error() }}</p>
                 </div>
             </div>
             <button (click)="refreshData()"
                 class="px-4 py-2 bg-white border border-red-100 text-red-700 rounded-lg text-sm font-bold hover:bg-red-100 transition-colors">
-                Try Again
+                Retry Audit
             </button>
         </div>
 
-        <ng-container *ngIf="metrics">
-            <!-- Metric Cards Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-                <app-metric-card label="Total Vendors" [value]="metrics.totalVendors.count"
-                    [subtitle]="'+' + metrics.totalVendors.growth + ' this month'" icon="activity" iconBg="bg-blue-700"
-                    trendColor="text-blue-600">
-                </app-metric-card>
-
-                <app-metric-card label="Verified Listings" [value]="metrics.verifiedListings.count"
-                    [subtitle]="metrics.verifiedListings.rate + '% verification rate'" icon="badge-check"
-                    iconBg="bg-yellow-400" trendColor="text-gray-400">
-                </app-metric-card>
-
-                <app-metric-card label="Most Visited Spot" [value]="metrics.mostVisitedSpot.name"
-                    [subtitle]="(metrics.mostVisitedSpot.views | number) + ' views this week'" icon="activity"
-                    iconBg="bg-red-500" trendColor="text-red-500">
-                </app-metric-card>
-
-                <app-metric-card label="Trending Dish" [value]="metrics.trendingDish.name"
-                    [subtitle]="(metrics.trendingDish.searches | number) + ' searches this week'" icon="activity"
-                    iconBg="bg-blue-600" trendColor="text-blue-500">
-                </app-metric-card>
-            </div>
-
-            <!-- Main Content Split -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
-                <div class="lg:col-span-2">
-                    <app-engagement-chart [data]="metrics.userEngagement" [maxVal]="1000"></app-engagement-chart>
-                </div>
+        <!-- Pending Approvals Section -->
+        <section class="mb-16">
+            <div class="flex items-center justify-between mb-8">
                 <div>
-                    <app-trending-list [dishes]="metrics.topDishes"></app-trending-list>
+                    <h3 class="text-2xl font-bold text-gray-900 tracking-tight">Pending Listings</h3>
                 </div>
+                <span
+                    class="px-3 py-1 bg-yellow-50 text-yellow-700 rounded-full text-xs font-bold border border-yellow-100">
+                    {{ pendingVendors.length }} Pending
+                </span>
             </div>
 
-            <!-- Pending Approvals Section -->
-            <section class="mb-16">
-                <div class="flex items-center justify-between mb-8">
-                    <div>
-                        <h3 class="text-2xl font-bold text-gray-900 tracking-tight">Pending Listings</h3>
-                        <p class="text-gray-500 text-sm">Review recently submitted local eateries and heritage sites</p>
-                    </div>
-                    <span
-                        class="px-3 py-1 bg-yellow-50 text-yellow-700 rounded-full text-xs font-bold border border-yellow-100">
-                        {{ pendingVendors.length }} Pending
-                    </span>
-                </div>
-
-                <div class="space-y-4" *ngIf="pendingVendors.length > 0; else noPending">
-                    <app-approval-item *ngFor="let vendor of pendingVendors" [vendor]="vendor"
+            <div class="space-y-4" *ngIf="pendingVendors.length > 0; else noPending">
+                <div *ngFor="let vendor of pendingVendors">
+                    <app-approval-item [vendor]="vendor"
                         (approve)="onApprove($event)" (reject)="onReject($event)">
                     </app-approval-item>
-                </div>
-                <ng-template #noPending>
-                    <div class="bg-gray-50 rounded-3xl border-2 border-dashed border-gray-100 p-20 text-center">
-                        <div
-                            class="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-6">
-                            <lucide-icon name="check" class="text-green-500 w-8 h-8"></lucide-icon>
-                        </div>
-                        <h4 class="text-lg font-bold text-gray-900 mb-1">Queue is Clear!</h4>
-                        <p class="text-gray-400 text-sm">All vendor submissions have been reviewed.</p>
+                    
+                    <!-- View Details Button -->
+                    <div class="mt-2 flex gap-2 ml-[104px]">
+                        <button (click)="viewDetails(vendor)" 
+                            class="text-sm font-bold text-angeles-blue hover:underline flex items-center gap-1.5">
+                            <lucide-icon name="eye" class="w-4 h-4"></lucide-icon>
+                            {{ selectedVendor()?._id === vendor._id ? 'Hide Details' : 'View Full Submission' }}
+                        </button>
+                        <button (click)="onAuthenticate(vendor._id)"
+                            class="text-sm font-bold text-yellow-700 hover:text-yellow-800 flex items-center gap-1.5 ml-4">
+                            <lucide-icon name="badge-check" class="w-4 h-4"></lucide-icon>
+                            Verify as Authentic
+                        </button>
                     </div>
-                </ng-template>
-            </section>
+                    
+                    <!-- Expandable Detail View -->
+                    <div *ngIf="selectedVendor()?._id === vendor._id" 
+                         class="mt-4 p-6 bg-white rounded-2xl border border-gray-100 shadow-sm space-y-6 animate-in">
+                        
+                        <!-- Photos -->
+                        <div *ngIf="vendor.images && vendor.images.length > 0">
+                            <h5 class="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wider">Photos</h5>
+                            <div class="flex gap-3 overflow-x-auto pb-2">
+                                <img *ngFor="let img of vendor.images" [src]="img" 
+                                     class="w-24 h-24 rounded-xl object-cover shadow-sm border border-gray-100" alt="Vendor Photo">
+                            </div>
+                        </div>
 
-            <!-- Cultural Impact Section -->
-            <section>
-                <div class="mb-8">
-                    <h3 class="text-2xl font-bold text-gray-900 tracking-tight">Cultural Impact Insights</h3>
-                    <p class="text-gray-500 text-sm">How Angeles Eats & Roots preserves and promotes Kapampangan culture
-                    </p>
+                        <!-- Cultural Story -->
+                        <div *ngIf="vendor.culturalStory">
+                            <h5 class="font-bold text-gray-900 mb-2 text-sm uppercase tracking-wider">Cultural Story</h5>
+                            <p class="text-gray-600 text-sm leading-relaxed italic bg-gray-50 p-4 rounded-xl">"{{ vendor.culturalStory }}"</p>
+                        </div>
+
+                        <!-- Menu Highlights (if eatery) -->
+                        <div *ngIf="vendor.menuHighlights && vendor.menuHighlights.length > 0">
+                            <h5 class="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wider">Menu Highlights</h5>
+                            <div class="space-y-2">
+                                <div *ngFor="let item of vendor.menuHighlights" 
+                                     class="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
+                                    <img *ngIf="item.image" [src]="item.image" class="w-12 h-12 rounded-lg object-cover" alt="">
+                                    <div class="flex-1">
+                                        <p class="font-bold text-gray-900 text-sm">{{ item.name }}</p>
+                                        <p *ngIf="item.description" class="text-gray-500 text-xs">{{ item.description }}</p>
+                                    </div>
+                                    <span *ngIf="item.price" class="text-angeles-red font-bold text-sm">₱{{ item.price }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Heritage Info -->
+                        <div *ngIf="vendor.historicalSignificance">
+                            <h5 class="font-bold text-gray-900 mb-2 text-sm uppercase tracking-wider">Historical Significance</h5>
+                            <p class="text-gray-600 text-sm leading-relaxed bg-gray-50 p-4 rounded-xl">{{ vendor.historicalSignificance }}</p>
+                        </div>
+                        <div *ngIf="vendor.yearEstablished">
+                            <h5 class="font-bold text-gray-900 mb-2 text-sm uppercase tracking-wider">Year Established</h5>
+                            <p class="text-gray-800 font-bold bg-gray-50 p-4 rounded-xl">{{ vendor.yearEstablished }}</p>
+                        </div>
+
+                        <!-- Authenticity Traits -->
+                        <div *ngIf="vendor.authenticityTraits && vendor.authenticityTraits.length > 0">
+                            <h5 class="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wider">Authenticity Traits</h5>
+                            <div class="flex flex-wrap gap-2">
+                                <span *ngFor="let trait of vendor.authenticityTraits" 
+                                      class="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-xs font-bold border border-blue-100">
+                                    {{ trait }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <button (click)="closeDetails()" class="text-sm text-gray-400 hover:text-gray-600 font-bold flex items-center gap-1">
+                            <lucide-icon name="x" class="w-4 h-4"></lucide-icon> Close
+                        </button>
+                    </div>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <app-impact-insight color="blue" label="Heritage Eateries Listed"
-                        [value]="metrics.culturalImpact.heritageEateries + '%'"
-                        description="of listings are family-owned or heritage-based" icon="user">
-                    </app-impact-insight>
-
-                    <app-impact-insight color="red" label="Cultural Stories Shared"
-                        [value]="metrics.culturalImpact.storiesShared"
-                        description="unique stories from local vendors shared with tourists" icon="star">
-                    </app-impact-insight>
-
-                    <app-impact-insight color="yellow" label="Community Engagement"
-                        [value]="metrics.culturalImpact.engagement + '%'"
-                        description="of verified listings have active user reviews and visits" icon="activity">
-                    </app-impact-insight>
-
-                    <app-impact-insight color="purple" label="Kapampangan Dishes Featured"
-                        [value]="metrics.culturalImpact.dishesFeatured + '+'"
-                        description="traditional recipes represented on the platform" icon="star">
-                    </app-impact-insight>
+            </div>
+            <ng-template #noPending>
+                <div class="bg-gray-50 rounded-3xl border-2 border-dashed border-gray-100 p-20 text-center">
+                    <div
+                        class="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-6">
+                        <lucide-icon [name]="check" class="text-green-500 w-8 h-8"></lucide-icon>
+                    </div>
+                    <h4 class="text-lg font-bold text-gray-900 mb-1">Audit Clear!</h4>
+                    <p class="text-gray-400 text-sm">All submissions have been successfully verified or rejected.</p>
                 </div>
-            </section>
-        </ng-container>
+            </ng-template>
+        </section>
     </main>
 </div>

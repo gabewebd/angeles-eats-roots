@@ -3,23 +3,32 @@ const mongoose = require('mongoose');
 const VendorSchema = new mongoose.Schema({
     name: { type: String, required: true },
     yearsInOperation: { type: String, required: true }, // e.g., "Since 1974"
-    category: { type: String, enum: ['Local Eatery', 'Heritage Site'], required: true },
+    category: { 
+        type: String, 
+        enum: ['Local Eatery', 'Heritage Site'], 
+        required: true 
+    },
     culturalStory: { type: String, required: true }, // Max 500 chars per your UI
     location: {
-        address: String, // e.g., "Valdez Street, Angeles City"
+        address: { type: String, required: true }, // e.g., "Valdez Street, Angeles City"
         coordinates: { lat: Number, lng: Number }
     },
     images: [String], // Array of Cloudinary URLs
     authenticityTraits: [String], // e.g., "Original family recipe"
     menuHighlights: [{
-        name: String,
-        description: String,
-        price: Number,
-        image: String // Cloudinary URL
+        name: { type: String },
+        description: { type: String },
+        price: { type: Number },
+        image: { type: String } // Cloudinary URL
     }],
+    // Heritage Site specific fields
+    historicalSignificance: { type: String },
+    yearEstablished: { type: String },
     rating: { type: Number, default: 0 },
     reviewCount: { type: Number, default: 0 },
     isVerified: { type: Boolean, default: false }, // For Admin Approval
+    isAuthentic: { type: Boolean, default: false }, // Special yellow badge
+    submittedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     createdAt: { type: Date, default: Date.now }
 });
 

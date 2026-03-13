@@ -5,6 +5,7 @@ import { LucideAngularModule, Home, Map, PlusCircle, User } from 'lucide-angular
 
 @Component({
   selector: 'app-bottom-nav',
+  standalone: true,
   imports: [CommonModule, RouterModule, LucideAngularModule],
   templateUrl: './bottom-nav.html',
   styleUrl: './bottom-nav.css',

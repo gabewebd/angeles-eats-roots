@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController');
+const authMiddleware = require('../middleware/auth');
+
+// All admin routes require JWT authentication
+router.use(authMiddleware);
 
 // Dashboard Overview Metrics
 router.get('/metrics', adminController.getDashboardMetrics);

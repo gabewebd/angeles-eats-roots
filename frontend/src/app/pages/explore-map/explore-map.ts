@@ -4,11 +4,16 @@ import { LucideAngularModule, Filter, Coffee, Home } from 'lucide-angular';
 
 @Component({
   selector: 'app-explore-map',
+  standalone: true,
   imports: [CommonModule, LucideAngularModule],
   templateUrl: './explore-map.html',
   styleUrl: './explore-map.css',
 })
 export class ExploreMap {
+  readonly filter = Filter;
+  readonly coffee = Coffee;
+  readonly home = Home;
+
   markers = [
     { type: 'heritage', icon: 'home', colorClasses: 'bg-angeles-blue text-white shadow-blue-900/40', top: '25%', left: '65%' },
     { type: 'eatery', icon: 'coffee', colorClasses: 'bg-angeles-red text-white shadow-red-900/40', top: '35%', left: '42%' },

@@ -1,14 +1,36 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet, RouterModule } from '@angular/router';
+import { Component, signal, inject, OnInit, OnDestroy } from '@angular/core';
+import { RouterOutlet, RouterModule, Router, NavigationEnd } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { BottomNavComponent } from './components/shared/bottom-nav/bottom-nav';
 import { Footer } from './components/shared/footer/footer';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterModule, BottomNavComponent, Footer],
+  standalone: true,
+  imports: [CommonModule, RouterOutlet, RouterModule, BottomNavComponent, Footer],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App {
+export class App implements OnInit, OnDestroy {
   protected readonly title = signal('frontend');
+  showNav = signal(true);
+
+  private router = inject(Router);
+  private routerSub!: Subscription;
+
+  ngOnInit() {
+    this.routerSub = this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      const url = event.urlAfterRedirects || event.url;
+      const isAdminRoute = url.startsWith('/admin');
+      this.showNav.set(!isAdminRoute);
+    });
+  }
+
+  ngOnDestroy() {
+    this.routerSub?.unsubscribe();
+  }
 }

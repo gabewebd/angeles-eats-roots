@@ -7,27 +7,42 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors());
+// CORS Configuration - Rigorous Audit
+app.use(cors({
+    origin: ['http://localhost:4200', 'http://127.0.0.1:4200'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
+
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Routes
 const vendorRoutes = require('./routes/vendorRoutes');
 const userRoutes = require('./routes/userRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const authRoutes = require('./routes/authRoutes');
+
 app.use('/api/vendors', vendorRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/auth', authRoutes);
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('✅ MongoDB Atlas Connected!'))
-    .catch(err => console.error('❌ MongoDB Connection Error:', err));
+// MongoDB Connection with explicit DB Name
+const MONGODB_URI = process.env.MONGODB_URI;
 
-app.get('/', (req, res) => {
-    res.send('Angeles Eats & Roots API is running...');
+mongoose.connect(MONGODB_URI, {
+    dbName: 'angeles_eats_roots'
+})
+.then(() => console.log('✅ MongoDB Atlas Connected: angeles_eats_roots'))
+.catch(err => {
+    console.error('❌ MongoDB Connection Error:', err);
+    process.exit(1);
+});
+
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'OK', message: 'API is running' });
 });
 
 app.listen(PORT, () => {
